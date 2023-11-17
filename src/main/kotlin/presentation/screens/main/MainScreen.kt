@@ -17,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.koin.getScreenModel
 import presentation.designsystem.components.ThemeSwitch
 import presentation.designsystem.theme.mainBackgroundColor
 import presentation.utils.loadSvgPainter
@@ -27,6 +28,8 @@ class MainScreen(
 
     @Composable
     override fun Content() {
+        val screenModel = getScreenModel<MainScreenModel>()
+
         Screen(modifier = modifier)
     }
 
@@ -36,7 +39,6 @@ class MainScreen(
     ) {
         val mainSpace = 12.dp
 
-        // Todo: Add navigator
         Row(
             modifier = modifier.background(mainBackgroundColor).padding(mainSpace),
             horizontalArrangement = Arrangement.spacedBy(mainSpace),
@@ -49,6 +51,7 @@ class MainScreen(
                     Text(text = "OI")
                 }
             }
+
         }
     }
 

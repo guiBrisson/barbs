@@ -19,7 +19,7 @@ data class AssistantData(
     @SerialName("model")
     val model: String,
     @SerialName("instructions")
-    val instructions: String,
+    val instructions: String?,
     @SerialName("tools")
     val tools: List<AssistantTools>,
 )

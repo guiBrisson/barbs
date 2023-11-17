@@ -5,3 +5,4 @@
 3. Add a string resource files, so it is easy to translate the app
 4. A feature for handling audio to text (and text to audio) conversion
 5. Save user's preferences (theme)
+6. Accessibility
