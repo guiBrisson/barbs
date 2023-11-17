@@ -19,6 +19,7 @@ object KtorClient {
             json(Json {
                 prettyPrint = true
                 isLenient = true
+                ignoreUnknownKeys = true
             })
         }
 
@@ -29,11 +30,15 @@ object KtorClient {
         }
 
         install(Logging) {
-            logger = Logger.DEFAULT
+            logger = Logger.SIMPLE
             level = LogLevel.HEADERS
 
             // Sanitize sensitive headers to avoid their values appearing in the logs
             sanitizeHeader { header -> header == HttpHeaders.Authorization }
+        }
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = 2 * 60 * 1000 // 2 minutes
         }
     }
 }
