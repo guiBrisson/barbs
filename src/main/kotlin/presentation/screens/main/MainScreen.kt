@@ -34,7 +34,7 @@ class MainScreen(
     private fun Screen(
         modifier: Modifier = Modifier,
     ) {
-        val mainSpace = 16.dp
+        val mainSpace = 12.dp
 
         // Todo: Add navigator
         Row(

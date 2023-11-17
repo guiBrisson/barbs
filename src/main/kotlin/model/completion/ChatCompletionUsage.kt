@@ -1,4 +1,4 @@
-package model
+package model.completion
 
 
 import kotlinx.serialization.SerialName

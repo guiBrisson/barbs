@@ -1,7 +1,7 @@
 package domain.repository
 
 import kotlinx.coroutines.flow.Flow
-import model.ChatCompletion
+import model.completion.ChatCompletion
 import model.ResultOf
 
 interface ChatCompletionRepository {
