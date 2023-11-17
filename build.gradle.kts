@@ -28,6 +28,9 @@ dependencies {
     // Serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
 
+    // Dependency Injection
+    implementation("io.insert-koin:koin-core:3.5.0")
+
     // Navigator
     implementation("cafe.adriel.voyager:voyager-navigator:1.0.0-rc10")
     implementation("cafe.adriel.voyager:voyager-koin:1.0.0-rc10")

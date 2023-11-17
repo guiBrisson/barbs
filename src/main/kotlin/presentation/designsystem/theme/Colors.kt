@@ -23,3 +23,5 @@ val dark_background = Color(0xFF1C1C1C)
 val dark_onBackground = Color(0xFFFFFFFF)
 val dark_surface = Color(0xFF161616)
 val dark_onSurface = Color(0xFFFFFFFF)
+
+val mainBackgroundColor = Color(0xFF0E0E0E)
