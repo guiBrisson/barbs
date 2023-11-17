@@ -2,6 +2,7 @@ package presentation.screens.splash
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import data.local.Assistant
 import domain.repository.AssistantsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,7 +27,9 @@ class SplashScreenModel(
                 }
 
                 is ResultOf.Success -> {
-                    _assistantUiState.update { AssistantUiState.Success(result.value.data.first()) }
+                    val assistant = result.value.data.first()
+                    Assistant.current = assistant
+                    _assistantUiState.update { AssistantUiState.Success(assistant) }
                 }
             }
         }

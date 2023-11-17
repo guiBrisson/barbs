@@ -9,7 +9,7 @@ import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
-import utils.getLocalProperty
+import presentation.utils.getLocalProperty
 
 object KtorClient {
     private val OPENAI_API_KEY = getLocalProperty("openai.api.key").toString()
