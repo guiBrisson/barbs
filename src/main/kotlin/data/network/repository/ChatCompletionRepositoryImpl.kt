@@ -8,33 +8,21 @@ import io.ktor.client.request.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import model.ChatCompletion
+import model.ResultOf
 
 class ChatCompletionRepositoryImpl : ChatCompletionRepository {
     private val client = KtorClient.client
 
-    override suspend fun completion(prompt: String): Flow<ChatCompletion> = flow {
-        val completion = client.post("chat/completions") {
-            setBody(CompletionBody(prompt))
-        }.body<ChatCompletion>()
-//        println(completion)
-        emit(completion)
+    override suspend fun completion(prompt: String): Flow<ResultOf<ChatCompletion>> = flow {
+        emit(ResultOf.Loading)
+        try {
+            val completion = client.post("chat/completions") {
+                setBody(CompletionBody(prompt))
+            }.body<ChatCompletion>()
+            emit(ResultOf.Success(completion))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(ResultOf.Failure(e))
+        }
     }
-
-//    override suspend fun completion(prompt: String): Flow<ChatCompletion> = flow {
-//        client.preparePost("chat/completions") {
-//            setBody(CompletionBody(prompt))
-//        }.execute { httpResponse ->
-//            val channel: ByteReadChannel = httpResponse.body()
-//            while (!channel.isClosedForRead) {
-//                val packet = channel.readRemaining(DEFAULT_BUFFER_SIZE.toLong())
-//                while (packet.isNotEmpty) {
-//                    val stringJsonResponse = packet.readUTF8Line()
-//                    stringJsonResponse?.removePrefix("data: ").also(::println)
-////                    val response = json.decodeFromString<DataCompletionBody>(stringJsonResponse)
-////                    val completion = response.data
-////                    emit(completion)
-//                }
-//            }
-//        }
-//    }
 }
