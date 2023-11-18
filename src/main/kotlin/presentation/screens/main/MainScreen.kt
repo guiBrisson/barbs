@@ -26,8 +26,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
+import cafe.adriel.voyager.navigator.CurrentScreen
+import cafe.adriel.voyager.navigator.Navigator
+import model.thread.Thread
 import presentation.designsystem.components.ThemeSwitch
 import presentation.designsystem.theme.mainBackgroundColor
+import presentation.screens.thread.ThreadScreen
 import presentation.utils.loadSvgPainter
 
 class MainScreen(
@@ -63,24 +67,20 @@ class MainScreen(
     ) {
         val mainSpace = 12.dp
 
-        Row(
-            modifier = modifier.background(mainBackgroundColor).padding(mainSpace),
-            horizontalArrangement = Arrangement.spacedBy(mainSpace),
-        ) {
-            Sidebar(
-                threadsUiState = threadsUiState,
-                newThreadUiState = newThreadUiState,
-                onAddChat = onAddChat,
-                onThread = { /*TODO: navigate to thread screen*/ },
-            )
+        Navigator(ThreadScreen(null)) { navigator ->
+            Row(
+                modifier = modifier.background(mainBackgroundColor).padding(mainSpace),
+                horizontalArrangement = Arrangement.spacedBy(mainSpace),
+            ) {
+                Sidebar(
+                    threadsUiState = threadsUiState,
+                    newThreadUiState = newThreadUiState,
+                    onAddChat = onAddChat,
+                    onThread = { navigator.push(ThreadScreen(it)) },
+                )
 
-            // Todo: move this to it's own screen
-            Surface(modifier = Modifier.clip(RoundedCornerShape(12.dp)), color = MaterialTheme.colors.background) {
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Text(text = "OI")
-                }
+                CurrentScreen()
             }
-
         }
     }
 
@@ -179,6 +179,8 @@ class MainScreen(
         threadsUiState: ThreadsUiState.Success,
         onThread: (treadId: String) -> Unit,
     ) {
+        var selectedThread by remember { mutableStateOf<Thread?>(null) }
+
         LazyColumn(modifier = modifier) {
             val list = threadsUiState.list
 
@@ -196,8 +198,19 @@ class MainScreen(
             }
 
             items(list) { thread ->
+                val backgroundColor = if (selectedThread == thread) {
+                    Color(0xFF32323E)
+                } else {
+                    Color.Unspecified
+                }
+
                 Text(
-                    modifier = Modifier.fillMaxWidth().clickable { onThread(thread.id) }.padding(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(backgroundColor)
+                        .clickable { onThread(thread.id); selectedThread = thread }
+                        .padding(12.dp),
                     text = thread.id,
                     fontSize = 14.sp,
                     color = Color.White,
