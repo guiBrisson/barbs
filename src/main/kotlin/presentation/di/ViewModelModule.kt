@@ -5,6 +5,6 @@ import presentation.screens.main.MainScreenModel
 import presentation.screens.splash.SplashScreenModel
 
 val viewModelModule = module {
-    factory { MainScreenModel() }
+    factory { MainScreenModel(get()) }
     factory { SplashScreenModel(get()) }
 }
