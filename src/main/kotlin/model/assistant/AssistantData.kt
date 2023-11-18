@@ -11,7 +11,7 @@ data class AssistantData(
     @SerialName("object")
     val objectX: String,
     @SerialName("created_at")
-    val createdAt: Int,
+    val createdAt: Long,
     @SerialName("name")
     val name: String,
     @SerialName("description")

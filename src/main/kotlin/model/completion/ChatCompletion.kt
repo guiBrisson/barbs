@@ -9,7 +9,7 @@ data class ChatCompletion(
     @SerialName("choices")
     val choices: List<ChatCompletionChoice>,
     @SerialName("created")
-    val created: Int,
+    val created: Long,
     @SerialName("id")
     val id: String,
     @SerialName("model")
