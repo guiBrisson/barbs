@@ -33,9 +33,9 @@ fun ThemeSwitch(
         ThemeState.isDark = isDark
     }
     val innerModifier =
-        modifier.clip(RoundedCornerShape(8.dp)).background(dark_background).padding(4.dp)
+        modifier.heightIn(max = 44.dp).clip(RoundedCornerShape(8.dp)).background(dark_background).padding(4.dp)
 
-    AnimatedContent(isExpanded, ) { expanded ->
+    AnimatedContent(isExpanded) { expanded ->
         if (expanded) {
             ExtendedThemeSwitch(
                 modifier = innerModifier,
