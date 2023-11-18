@@ -29,7 +29,7 @@ data class RunThread(
     @SerialName("object")
     val objectX: String,
     @SerialName("started_at")
-    val startedAt: Long,
+    val startedAt: Long?,
     @SerialName("status")
     val status: String,
     @SerialName("thread_id")

@@ -19,7 +19,7 @@ data class Message(
     @SerialName("content")
     val content: List<MessageContent>,
     @SerialName("assistant_id")
-    val assistantId: String,
+    val assistantId: String?,
     @SerialName("run_id")
-    val runId: String
+    val runId: String?,
 )

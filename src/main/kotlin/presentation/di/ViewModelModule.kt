@@ -8,5 +8,5 @@ import presentation.screens.thread.ThreadScreenModel
 val viewModelModule = module {
     factory { MainScreenModel(get()) }
     factory { SplashScreenModel(get()) }
-    factory { ThreadScreenModel() }
+    factory { ThreadScreenModel(get(), get()) }
 }
