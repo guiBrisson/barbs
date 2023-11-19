@@ -7,8 +7,13 @@ import domain.repository.MessageRepository
 import domain.repository.RunThreadRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import model.ResultOf
+import model.message.Message
 import kotlin.time.Duration.Companion.seconds
 
 class ThreadScreenModel(
@@ -18,15 +23,19 @@ class ThreadScreenModel(
     private val assistantId: String? = Assistant.current?.id
     var threadId: String? = null
 
+    private val _messagesUiState = MutableStateFlow(MessagesUiState())
+    val messagesUiState: StateFlow<MessagesUiState> = _messagesUiState.asStateFlow()
+
     fun addMessage(prompt: String) {
         screenModelScope.launch(Dispatchers.IO) {
             threadId?.let { threadId ->
-                val result = messageRepository.createMessage(threadId, prompt)
-
-                if (result.isSuccessful()) {
-                    // should keep going
-                    println("THREAD_MODEL: message added")
-                    runThread(threadId)
+                when (val result = messageRepository.createMessage(threadId, prompt)) {
+                    is ResultOf.Success -> {
+                        println("THREAD_MODEL: message added")
+                        appendMessageOnMessageList(result.value)
+                        runThread(threadId)
+                    }
+                    is ResultOf.Failure -> Unit // Todo: handle failure
                 }
             }
         }
@@ -84,17 +93,37 @@ class ThreadScreenModel(
                 is ResultOf.Success -> {
                     val fullMessage = result.value.content.map { it.text.value }
                     println("THREAD_MODEL: Completion: $fullMessage")
+                    appendMessageOnMessageList(result.value)
                 }
                 is ResultOf.Failure -> Unit // Todo: handle failure
             }
         }
     }
 
-    private fun updateThreadMessages(threadId: String) {
+    private fun appendMessageOnMessageList(message: Message) {
+        val messages = _messagesUiState.value.messages.toMutableList()
+        messages.add(0, message)
+
+        _messagesUiState.update {
+            _messagesUiState.value.copy(messages = messages)
+        }
+    }
+
+    fun fetchMessages(threadId: String) {
         screenModelScope.launch(Dispatchers.IO) {
+            _messagesUiState.update { _messagesUiState.value.copy(loading = true, error = null, messages = emptyList()) }
             when (val result = messageRepository.listMessage(threadId)) {
-                is ResultOf.Success -> TODO()
-                is ResultOf.Failure -> TODO()
+                is ResultOf.Success -> {
+                    _messagesUiState.update {
+                        _messagesUiState.value.copy(loading = false, error = null, messages = result.value.data)
+                    }
+                }
+                is ResultOf.Failure -> {
+                    _messagesUiState.update {
+                        val errorMessage = result.exception?.message ?: "Unexpected Error"
+                        _messagesUiState.value.copy(loading = false, error = errorMessage)
+                    }
+                }
             }
         }
     }

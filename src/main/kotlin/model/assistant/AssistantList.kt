@@ -11,9 +11,9 @@ data class AssistantList(
     @SerialName("data")
     val data: List<AssistantData>,
     @SerialName("first_id")
-    val firstId: String,
+    val firstId: String?,
     @SerialName("last_id")
-    val lastId: String,
+    val lastId: String?,
     @SerialName("has_more")
     val hasMore: Boolean
 )
