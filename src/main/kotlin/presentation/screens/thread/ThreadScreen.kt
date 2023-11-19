@@ -44,8 +44,9 @@ class ThreadScreen(
         val completionUiState by screenModel.completionUiState.collectAsState()
 
         LaunchedEffect(threadId) {
+            screenModel.threadId = threadId
+
             threadId?.let { id ->
-                screenModel.threadId = id
                 screenModel.fetchMessages(id)
             }
         }
@@ -69,6 +70,7 @@ class ThreadScreen(
         completionUiState: CompletionUiState,
         onSendMessage: (prompt: String) -> Unit,
     ) {
+        //Todo: Add scroll bar
         var prompt by remember { mutableStateOf("") }
 
         val scrollState = rememberLazyListState()
@@ -98,35 +100,37 @@ class ThreadScreen(
                 }
             }
 
-            Box(
-                modifier = Modifier.padding(horizontal = 20.dp).weight(1f).widthIn(max = 820.dp),
-            ) {
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    state = scrollState,
-                    verticalArrangement = Arrangement.Bottom,
+            if (!threadId.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier.padding(horizontal = 20.dp).weight(1f).widthIn(max = 820.dp),
                 ) {
 
-                    if (messagesUiState.messages.isNotEmpty()) {
-                        items(messagesUiState.messages.reversed()) { message ->
-                            MessageItem(modifier = Modifier.padding(vertical = 16.dp), message = message)
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        state = scrollState,
+                        verticalArrangement = Arrangement.Bottom,
+                    ) {
+
+                        if (messagesUiState.messages.isNotEmpty()) {
+                            items(messagesUiState.messages.reversed()) { message ->
+                                MessageItem(modifier = Modifier.padding(vertical = 16.dp), message = message)
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.padding(bottom = 20.dp))
                         }
                     }
 
-                    item {
-                        Spacer(modifier = Modifier.padding(bottom = 20.dp))
+                    if (!endOfListReached && !messagesUiState.loading) {
+                        ScrollDownFloatingButton(
+                            modifier = Modifier.align(Alignment.BottomEnd),
+                            messagesUiState = messagesUiState,
+                            scrollState = scrollState,
+                        )
                     }
-                }
 
-                if (!endOfListReached && !messagesUiState.loading) {
-                    ScrollDownFloatingButton(
-                        modifier = Modifier.align(Alignment.BottomEnd),
-                        messagesUiState = messagesUiState,
-                        scrollState = scrollState,
-                    )
                 }
-
             }
 
             if (!threadId.isNullOrEmpty()) {

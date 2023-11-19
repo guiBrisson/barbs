@@ -13,12 +13,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -55,6 +59,7 @@ class MainScreen(
             threadsUiState = threadsUiState,
             newThreadUiState = newThreadUiState,
             onAddChat = screenModel::newThread,
+            onDeleteThread = screenModel::deleteThread,
         )
     }
 
@@ -64,6 +69,7 @@ class MainScreen(
         threadsUiState: ThreadsUiState,
         newThreadUiState: NewThreadUiState,
         onAddChat: () -> Unit,
+        onDeleteThread: (treadId: String) -> Unit,
     ) {
         val mainSpace = 12.dp
 
@@ -77,6 +83,12 @@ class MainScreen(
                     newThreadUiState = newThreadUiState,
                     onAddChat = onAddChat,
                     onThread = { navigator.push(ThreadScreen(it)) },
+                    onDeleteThread = { threadId, shouldReload ->
+                        onDeleteThread(threadId)
+                        if (shouldReload) {
+                            navigator.push(ThreadScreen(null))
+                        }
+                    },
                 )
 
                 CurrentScreen()
@@ -91,6 +103,7 @@ class MainScreen(
         newThreadUiState: NewThreadUiState,
         onAddChat: () -> Unit,
         onThread: (treadId: String) -> Unit,
+        onDeleteThread: (treadId: String, shouldReload: Boolean) -> Unit,
     ) {
         var expanded by remember { mutableStateOf(true) }
         val columnWidth by animateDpAsState(if (expanded) 272.dp else 44.dp)
@@ -109,13 +122,14 @@ class MainScreen(
                     expanded = expanded,
                     threadsUiState = threadsUiState as ThreadsUiState.Success,
                     onThread = onThread,
+                    onDeleteThread = onDeleteThread,
                 )
             } else {
                 Spacer(modifier = Modifier.weight(1f))
             }
 
             AddChatButton(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
                 newThreadUiState = newThreadUiState,
                 expanded = expanded,
                 onAdd = onAddChat,
@@ -172,12 +186,14 @@ class MainScreen(
         }
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     private fun ThreadList(
         modifier: Modifier = Modifier,
         expanded: Boolean,
         threadsUiState: ThreadsUiState.Success,
         onThread: (treadId: String) -> Unit,
+        onDeleteThread: (treadId: String, shouldReload: Boolean) -> Unit,
     ) {
         var selectedThread by remember { mutableStateOf<Thread?>(null) }
 
@@ -198,30 +214,65 @@ class MainScreen(
             }
 
             items(list) { thread ->
+                var hovered by remember { mutableStateOf(false) }
+
                 val backgroundColor = if (selectedThread == thread) {
                     Color(0xFF32323E)
+                } else if (hovered) {
+                    Color.White.copy(alpha = 0.05f)
                 } else {
                     Color.Unspecified
                 }
 
-                Text(
+                Row(
                     modifier = Modifier
+                        .height(40.dp)
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .background(backgroundColor)
                         .clickable { onThread(thread.id); selectedThread = thread }
-                        .padding(12.dp),
-                    text = thread.id,
-                    fontSize = 12.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
+                        .onPointerEvent(PointerEventType.Enter) { hovered = true }
+                        .onPointerEvent(PointerEventType.Exit) { hovered = false },
+                ) {
+                    Text(
+                        modifier = Modifier.weight(1f).padding(12.dp),
+                        text = thread.id,
+                        fontSize = 12.sp,
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+
+                    if (hovered && expanded) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .clickable {
+                                    val shouldReload = selectedThread == thread
+                                    if (shouldReload) selectedThread = null
+                                    onDeleteThread(thread.id, shouldReload)
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                tint = Color.Red,
+                            )
+                        }
+                    }
+                }
+
             }
         }
     }
 
+
+    // Todo: when button is clicked should navigate to created thread
     @Composable
     private fun AddChatButton(
         modifier: Modifier = Modifier,

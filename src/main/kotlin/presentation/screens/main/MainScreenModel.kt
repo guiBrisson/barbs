@@ -51,4 +51,17 @@ class MainScreenModel(
         }
     }
 
+    fun deleteThread(threadId: String) {
+        screenModelScope.launch(Dispatchers.IO) {
+
+            // Todo: handle error on UI
+            when (val result = threadRepository.deleteThread(threadId)) {
+                is ResultOf.Success -> {
+                    if (result.value) fetchThreadList()
+                }
+                is ResultOf.Failure -> Unit
+            }
+        }
+    }
+
 }
