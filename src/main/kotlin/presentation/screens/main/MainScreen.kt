@@ -1,5 +1,6 @@
 package presentation.screens.main
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.animateDpAsState
@@ -196,79 +197,118 @@ class MainScreen(
         onDeleteThread: (treadId: String, shouldReload: Boolean) -> Unit,
     ) {
         var selectedThread by remember { mutableStateOf<Thread?>(null) }
+        val list = threadsUiState.list
 
-        LazyColumn(modifier = modifier) {
-            val list = threadsUiState.list
+        AnimatedContent(list.isEmpty(), modifier = modifier) { isListEmpty ->
+            if (isListEmpty) {
+                if (expanded) {
+                    Column(
+                        modifier = modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        Icon(
+                            modifier = Modifier.sizeIn(minWidth = 40.dp),
+                            painter = loadSvgPainter("icons/ic_empty_state.svg"),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                        )
 
-            item {
-                val titleText = if (expanded) "Chat list" else "-"
+                        Text(
+                            text = "No Threads!",
+                            fontSize = 16.sp,
+                            color = Color.White.copy(alpha = 0.6f),
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                        )
 
-                Text(
-                    modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    text = titleText,
-                    textAlign = if (expanded) TextAlign.Start else TextAlign.Center,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    color = Color(0xFF737373),
-                )
-            }
-
-            items(list) { thread ->
-                var hovered by remember { mutableStateOf(false) }
-
-                val backgroundColor = if (selectedThread == thread) {
-                    Color(0xFF32323E)
-                } else if (hovered) {
-                    Color.White.copy(alpha = 0.05f)
-                } else {
-                    Color.Unspecified
-                }
-
-                Row(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(backgroundColor)
-                        .clickable { onThread(thread.id); selectedThread = thread }
-                        .onPointerEvent(PointerEventType.Enter) { hovered = true }
-                        .onPointerEvent(PointerEventType.Exit) { hovered = false },
-                ) {
-                    Text(
-                        modifier = Modifier.weight(1f).padding(12.dp),
-                        text = thread.id,
-                        fontSize = 12.sp,
-                        color = Color.White,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-
-                    if (hovered && expanded) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .clickable {
-                                    val shouldReload = selectedThread == thread
-                                    if (shouldReload) selectedThread = null
-                                    onDeleteThread(thread.id, shouldReload)
-                                },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                modifier = Modifier.size(16.dp),
-                                imageVector = Icons.Default.Delete,
-                                contentDescription = null,
-                                tint = Color.Red,
-                            )
-                        }
+                        Text(
+                            text = "Click on the New Chat button below to create a new thread",
+                            fontSize = 14.sp,
+                            color = Color.White.copy(alpha = 0.4f),
+                            fontWeight = FontWeight.Medium,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                        )
                     }
                 }
+            } else {
+                LazyColumn(modifier = modifier) {
 
+                    item {
+                        val titleText = if (expanded) "Chat list" else "-"
+
+                        Text(
+                            modifier = Modifier.fillMaxWidth().padding(12.dp),
+                            text = titleText,
+                            textAlign = if (expanded) TextAlign.Start else TextAlign.Center,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp,
+                            color = Color(0xFF737373),
+                        )
+                    }
+
+                    items(list) { thread ->
+                        var hovered by remember { mutableStateOf(false) }
+
+                        val backgroundColor = if (selectedThread == thread) {
+                            Color(0xFF32323E)
+                        } else if (hovered) {
+                            Color.White.copy(alpha = 0.05f)
+                        } else {
+                            Color.Unspecified
+                        }
+
+                        Row(
+                            modifier = Modifier
+                                .height(40.dp)
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(backgroundColor)
+                                .clickable { onThread(thread.id); selectedThread = thread }
+                                .onPointerEvent(PointerEventType.Enter) { hovered = true }
+                                .onPointerEvent(PointerEventType.Exit) { hovered = false },
+                        ) {
+                            Text(
+                                modifier = Modifier.weight(1f).padding(12.dp),
+                                text = thread.id,
+                                fontSize = 12.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+
+                            if (hovered && expanded) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(40.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.White.copy(alpha = 0.05f))
+                                        .clickable {
+                                            val shouldReload = selectedThread == thread
+                                            if (shouldReload) selectedThread = null
+                                            onDeleteThread(thread.id, shouldReload)
+                                        },
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(16.dp),
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = null,
+                                        tint = Color.Red,
+                                    )
+                                }
+                            }
+                        }
+
+                    }
+                }
             }
         }
+
+
     }
 
 
