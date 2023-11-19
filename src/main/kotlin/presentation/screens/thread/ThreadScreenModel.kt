@@ -20,7 +20,7 @@ class ThreadScreenModel(
     private val messageRepository: MessageRepository,
     private val runThreadRepository: RunThreadRepository,
 ) : ScreenModel {
-    private val assistantId: String? = Assistant.current?.id
+    private val assistantId: String = Assistant.current.id
     var threadId: String? = null
 
     private val _messagesUiState = MutableStateFlow(MessagesUiState())
@@ -47,20 +47,19 @@ class ThreadScreenModel(
 
     private fun runThread(threadId: String) {
         screenModelScope.launch(Dispatchers.IO) {
-            assistantId?.let { assistantId ->
-                when (val result = runThreadRepository.runThread(assistantId, threadId)) {
-                    is ResultOf.Success -> {
-                        checkThreadRunSteps(threadId, result.value.id)
-                        _completionUiState.update { CompletionUiState.InProgress("Thread is running") }
-                    }
+            when (val result = runThreadRepository.runThread(assistantId, threadId)) {
+                is ResultOf.Success -> {
+                    checkThreadRunSteps(threadId, result.value.id)
+                    _completionUiState.update { CompletionUiState.InProgress("Thread is running") }
+                }
 
-                    is ResultOf.Failure -> {
-                        val errorMessage = result.exception?.message ?: "Unexpected Error"
-                        _completionUiState.update { CompletionUiState.Error(errorMessage) }
-                    }
+                is ResultOf.Failure -> {
+                    val errorMessage = result.exception?.message ?: "Unexpected Error"
+                    _completionUiState.update { CompletionUiState.Error(errorMessage) }
                 }
             }
         }
+
     }
 
     private fun checkThreadRunSteps(threadId: String, runId: String) {
@@ -125,11 +124,7 @@ class ThreadScreenModel(
     fun fetchMessages(threadId: String) {
         screenModelScope.launch(Dispatchers.IO) {
             _messagesUiState.update {
-                _messagesUiState.value.copy(
-                    loading = true,
-                    error = null,
-                    messages = emptyList()
-                )
+                _messagesUiState.value.copy(loading = true, error = null, messages = emptyList())
             }
             when (val result = messageRepository.listMessage(threadId)) {
                 is ResultOf.Success -> {

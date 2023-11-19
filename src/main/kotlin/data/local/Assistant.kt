@@ -4,5 +4,5 @@ import model.assistant.AssistantData
 
 // Global singleton assistant
 object Assistant {
-    var current: AssistantData? = null
+    lateinit var current: AssistantData
 }

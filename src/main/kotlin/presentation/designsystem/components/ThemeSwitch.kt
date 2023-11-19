@@ -1,7 +1,6 @@
 package presentation.designsystem.components
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,7 +20,6 @@ import presentation.designsystem.theme.dark_background
 import presentation.designsystem.theme.mainBackgroundColor
 import presentation.utils.loadSvgPainter
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun ThemeSwitch(
     modifier: Modifier = Modifier,

@@ -115,7 +115,7 @@ class MainScreen(
             }
 
             AddChatButton(
-                modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp),
+                modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                 newThreadUiState = newThreadUiState,
                 expanded = expanded,
                 onAdd = onAddChat,
@@ -212,7 +212,7 @@ class MainScreen(
                         .clickable { onThread(thread.id); selectedThread = thread }
                         .padding(12.dp),
                     text = thread.id,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1,
@@ -241,7 +241,7 @@ class MainScreen(
         ) {
             if (newThreadUiState.isLoading()) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
+                    modifier = Modifier.size(16.dp),
                     strokeCap = StrokeCap.Round,
                     color = MaterialTheme.colors.onPrimary,
                     backgroundColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.4f),
@@ -256,10 +256,10 @@ class MainScreen(
                 enter = fadeIn(),
             ) {
                 Text(
-                    modifier = Modifier.padding(start = 12.dp),
+                    modifier = Modifier.padding(start = 8.dp),
                     text = "New Chat",
                     fontWeight = FontWeight.Medium,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                 )
             }
         }
