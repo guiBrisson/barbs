@@ -26,6 +26,9 @@ class ThreadScreenModel(
     private val _messagesUiState = MutableStateFlow(MessagesUiState())
     val messagesUiState: StateFlow<MessagesUiState> = _messagesUiState.asStateFlow()
 
+    private val _completionUiState = MutableStateFlow<CompletionUiState>(CompletionUiState.Idle)
+    val completionUiState: StateFlow<CompletionUiState> = _completionUiState.asStateFlow()
+
     fun addMessage(prompt: String) {
         screenModelScope.launch(Dispatchers.IO) {
             threadId?.let { threadId ->
@@ -35,6 +38,7 @@ class ThreadScreenModel(
                         appendMessageOnMessageList(result.value)
                         runThread(threadId)
                     }
+
                     is ResultOf.Failure -> Unit // Todo: handle failure
                 }
             }
@@ -46,11 +50,14 @@ class ThreadScreenModel(
             assistantId?.let { assistantId ->
                 when (val result = runThreadRepository.runThread(assistantId, threadId)) {
                     is ResultOf.Success -> {
-                        println("THREAD_MODEL: thread is running")
                         checkThreadRunSteps(threadId, result.value.id)
+                        _completionUiState.update { CompletionUiState.InProgress("Thread is running") }
                     }
 
-                    is ResultOf.Failure -> Unit // Todo: handle failure
+                    is ResultOf.Failure -> {
+                        val errorMessage = result.exception?.message ?: "Unexpected Error"
+                        _completionUiState.update { CompletionUiState.Error(errorMessage) }
+                    }
                 }
             }
         }
@@ -62,7 +69,7 @@ class ThreadScreenModel(
             when (val result = runThreadRepository.runStepList(threadId, runId)) {
                 is ResultOf.Success -> {
                     result.value.data.ifEmpty {
-                        println("THREAD_MODEL: run step is empty")
+                        _completionUiState.update { CompletionUiState.InProgress("Run step is empty") }
                         delay(milliDelay)
                         checkThreadRunSteps(threadId, runId)
                         return@launch
@@ -71,17 +78,20 @@ class ThreadScreenModel(
                     val firstStep = result.value.data.first()
 
                     if (firstStep.status.contains("in_progress")) {
-                        println("THREAD_MODEL: run step is in progress")
+                        _completionUiState.update { CompletionUiState.InProgress("Run step is in progress") }
                         delay(milliDelay)
                         checkThreadRunSteps(threadId, runId)
                         return@launch
                     } else if (firstStep.status.contains("completed")) {
-                        println("THREAD_MODEL: run step is complete")
+                        _completionUiState.update { CompletionUiState.InProgress("Run step is complete") }
                         fetchMessage(threadId, firstStep.stepDetails.messageCreation.messageId)
                     }
                 }
 
-                is ResultOf.Failure -> Unit // Todo: handle failure
+                is ResultOf.Failure -> {
+                    val errorMessage = result.exception?.message ?: "Unexpected Error"
+                    _completionUiState.update { CompletionUiState.Error(errorMessage) }
+                }
             }
 
         }
@@ -91,11 +101,14 @@ class ThreadScreenModel(
         screenModelScope.launch(Dispatchers.IO) {
             when (val result = messageRepository.getMessage(threadId, messageId)) {
                 is ResultOf.Success -> {
-                    val fullMessage = result.value.content.map { it.text.value }
-                    println("THREAD_MODEL: Completion: $fullMessage")
+                    _completionUiState.update { CompletionUiState.Idle }
                     appendMessageOnMessageList(result.value)
                 }
-                is ResultOf.Failure -> Unit // Todo: handle failure
+
+                is ResultOf.Failure -> {
+                    val errorMessage = result.exception?.message ?: "Unexpected Error"
+                    _completionUiState.update { CompletionUiState.Error(errorMessage) }
+                }
             }
         }
     }
@@ -111,13 +124,20 @@ class ThreadScreenModel(
 
     fun fetchMessages(threadId: String) {
         screenModelScope.launch(Dispatchers.IO) {
-            _messagesUiState.update { _messagesUiState.value.copy(loading = true, error = null, messages = emptyList()) }
+            _messagesUiState.update {
+                _messagesUiState.value.copy(
+                    loading = true,
+                    error = null,
+                    messages = emptyList()
+                )
+            }
             when (val result = messageRepository.listMessage(threadId)) {
                 is ResultOf.Success -> {
                     _messagesUiState.update {
                         _messagesUiState.value.copy(loading = false, error = null, messages = result.value.data)
                     }
                 }
+
                 is ResultOf.Failure -> {
                     _messagesUiState.update {
                         val errorMessage = result.exception?.message ?: "Unexpected Error"

@@ -18,10 +18,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import kotlinx.coroutines.launch
 import model.message.Message
+import presentation.designsystem.components.DotsTyping
 import presentation.utils.isScrolledToEnd
 import presentation.utils.loadSvgPainter
 import presentation.utils.scrollToTheBottom
@@ -34,6 +36,7 @@ class ThreadScreen(
     override fun Content() {
         val screenModel = getScreenModel<ThreadScreenModel>()
         val messagesUiState by screenModel.messagesUiState.collectAsState()
+        val completionUiState by screenModel.completionUiState.collectAsState()
 
         LaunchedEffect(threadId) {
             threadId?.let { id ->
@@ -43,9 +46,11 @@ class ThreadScreen(
         }
 
         Surface(modifier = Modifier.clip(RoundedCornerShape(12.dp)), color = MaterialTheme.colors.background) {
+            // TODO: show different screen when threadId is null
             Screen(
                 modifier = Modifier.fillMaxSize(),
                 messagesUiState = messagesUiState,
+                completionUiState = completionUiState,
                 onSendMessage = screenModel::addMessage,
             )
         }
@@ -55,10 +60,10 @@ class ThreadScreen(
     private fun Screen(
         modifier: Modifier = Modifier,
         messagesUiState: MessagesUiState,
+        completionUiState: CompletionUiState,
         onSendMessage: (prompt: String) -> Unit,
     ) {
         var prompt by remember { mutableStateOf("") }
-
 
         val scrollState = rememberLazyListState()
         val endOfListReached by remember { derivedStateOf { scrollState.isScrolledToEnd() } }
@@ -89,7 +94,7 @@ class ThreadScreen(
                     }
 
                     item {
-                        Spacer(modifier = Modifier.height(20.dp))
+                        Spacer(modifier = Modifier.padding(bottom = 20.dp))
                     }
                 }
 
@@ -107,14 +112,37 @@ class ThreadScreen(
                 modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp).widthIn(max = 820.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                OutlinedTextField(
-                    modifier = Modifier.weight(1f),
-                    value = prompt,
-                    onValueChange = { prompt = it },
-                )
+
+                Column(modifier = Modifier.weight(1f)) {
+                    if (completionUiState.isInProgress()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.Bottom,
+                        ) {
+                            val progressMessage = (completionUiState as CompletionUiState.InProgress).message
+
+                            DotsTyping(dotSize = 8.dp)
+
+                            Text(
+                                modifier = Modifier.padding(start = 12.dp),
+                                text = progressMessage,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = 0.4f)
+                            )
+                        }
+                    }
+
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = prompt,
+                        onValueChange = { prompt = it },
+                    )
+                }
 
                 IconButton(onClick = {
-                    if (prompt.isNotEmpty()) {
+                    if (prompt.isNotEmpty() && !completionUiState.isInProgress()) {
                         onSendMessage(prompt)
                         prompt = ""
                     }
@@ -122,6 +150,7 @@ class ThreadScreen(
                     Icon(imageVector = Icons.Default.Send, contentDescription = null)
                 }
             }
+
         }
     }
 
@@ -180,12 +209,12 @@ class ThreadScreen(
                     }
                 }
 
-                Text(text = if (isAssistant) "Assistant" else "You", fontWeight = FontWeight.SemiBold)
+                Text(text = if (isAssistant) "Assistant" else "You", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
             }
             val joinedMessages = message.content.joinToString("/n") { it.text.value }
 
             // Todo: make text selectable
-            Text(text = joinedMessages)
+            Text(text = joinedMessages, fontSize = 14.sp)
         }
     }
 
