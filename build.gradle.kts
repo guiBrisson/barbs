@@ -35,9 +35,6 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-navigator:1.0.0-rc10")
     implementation("cafe.adriel.voyager:voyager-koin:1.0.0-rc10")
 
-    // Dependency Injection
-    implementation("io.insert-koin:koin-core:3.5.0")
-
     // Logging
     implementation("ch.qos.logback:logback-classic:1.4.11")
 }
