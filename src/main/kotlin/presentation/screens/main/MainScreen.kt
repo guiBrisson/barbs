@@ -167,7 +167,7 @@ class MainScreen(
                         tint = MaterialTheme.colors.primary,
                     )
                     Text(
-                        text = "Lorem Ipsum",
+                        text = "Barbs",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,

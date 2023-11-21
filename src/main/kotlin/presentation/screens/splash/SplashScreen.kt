@@ -69,7 +69,7 @@ class SplashScreen(
                         tint = MaterialTheme.colors.primary,
                     )
                     Text(
-                        text = "Lorem Ipsum",
+                        text = "Barbs",
                         fontSize = 36.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
