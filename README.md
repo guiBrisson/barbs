@@ -1,7 +1,8 @@
 # Barbs
 
 Barbs is a desktop application developed in Kotlin and powered by Jetpack Compose. The primary objective of 
-this project is to showcase my skills and proficiency developing an application using the openAI assistants.<br> 
+this project is to showcase my skills and proficiency developing an application using the OpenAI assistants.
+[Test](test.md)<br> 
 **The assistant feature is currently in BETA during the development of this project.**
 
 ## Getting Started
@@ -15,12 +16,14 @@ following variable:
     Replace `your-api-key-here` with your actual OpenAI API key.
 
 2. The app fetch all your assistants and use the first on the list to use as the main assistant in the app. 
-    So, in order for the app to work properly, you need to have at least one assistant set in your openAI account.  
+    So, in order for the app to work properly, you need to have at least one assistant set in your OpenAI account.  
 
 ## Features
 
 - **Jetpack Compose UI**: Utilizes the modern UI toolkit for building native Android applications.
 - **OpenAI Integration**: Demonstrates integration with the OpenAI API to showcase assistants.
+
+[Here a some future improvements for the app](improvements.md)
 
 ## Dependencies
 
