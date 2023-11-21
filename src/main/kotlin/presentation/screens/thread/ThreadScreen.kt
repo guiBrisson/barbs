@@ -134,34 +134,35 @@ class ThreadScreen(
             }
 
             if (!threadId.isNullOrEmpty()) {
-                Row(
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp).widthIn(max = 820.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        if (completionUiState.isInProgress()) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.End,
-                                verticalAlignment = Alignment.Bottom,
-                            ) {
-                                val progressMessage = (completionUiState as CompletionUiState.InProgress).message
+                Column(modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp).widthIn(max = 820.dp)) {
+                    if (completionUiState.isInProgress()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.Bottom,
+                        ) {
+                            val progressMessage = (completionUiState as CompletionUiState.InProgress).message
 
-                                DotsTyping(dotSize = 8.dp)
+                            DotsTyping(dotSize = 8.dp)
 
-                                Text(
-                                    modifier = Modifier.padding(start = 12.dp),
-                                    text = progressMessage,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.4f)
-                                )
-                            }
+                            Text(
+                                modifier = Modifier.padding(start = 12.dp),
+                                text = progressMessage,
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colors.onBackground.copy(alpha = 0.4f)
+                            )
                         }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         val strokeColor = if (ThemeState.isDark) dark_stroke else light_stroke
 
                         OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.weight(1f),
                             value = prompt,
                             onValueChange = { prompt = it },
                             label = {
@@ -173,16 +174,17 @@ class ThreadScreen(
                             shape = RoundedCornerShape(8.dp),
                             textStyle = TextStyle(fontSize = 14.sp),
                         )
+
+                        IconButton(onClick = {
+                            if (prompt.isNotEmpty() && !completionUiState.isInProgress()) {
+                                onSendMessage(prompt)
+                                prompt = ""
+                            }
+                        }) {
+                            Icon(imageVector = Icons.Default.Send, contentDescription = null)
+                        }
                     }
 
-                    IconButton(onClick = {
-                        if (prompt.isNotEmpty() && !completionUiState.isInProgress()) {
-                            onSendMessage(prompt)
-                            prompt = ""
-                        }
-                    }) {
-                        Icon(imageVector = Icons.Default.Send, contentDescription = null)
-                    }
                 }
             }
 
@@ -245,7 +247,11 @@ class ThreadScreen(
                         }
                     }
 
-                    Text(text = if (isAssistant) "Assistant" else "You", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                    Text(
+                        text = if (isAssistant) "Assistant" else "You",
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 14.sp
+                    )
                 }
                 val joinedMessages = message.content.joinToString("/n") { it.text.value }
 

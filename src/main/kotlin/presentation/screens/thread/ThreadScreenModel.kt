@@ -32,7 +32,7 @@ class ThreadScreenModel(
     fun addMessage(prompt: String) {
         screenModelScope.launch(Dispatchers.IO) {
             threadId?.let { threadId ->
-                when (val result = messageRepository.createMessage(threadId, prompt)) {
+                when (val result = messageRepository.createMessage(threadId, prompt.trim())) {
                     is ResultOf.Success -> {
                         println("THREAD_MODEL: message added")
                         appendMessageOnMessageList(result.value)
